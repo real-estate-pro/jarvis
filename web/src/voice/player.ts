@@ -24,9 +24,15 @@ class VoicePlayer {
   private readonly idleListeners = new Set<() => void>();
   private readonly listeners = new Set<(speaking: boolean) => void>();
   private errorHandler: (err: Error) => void = () => {};
+  private blockedHandler: () => void = () => {};
 
   onError(fn: (err: Error) => void) {
     this.errorHandler = fn;
+  }
+
+  /** Called when the browser won't let audio play until the next tap. */
+  onBlocked(fn: () => void) {
+    this.blockedHandler = fn;
   }
 
   /** Create / resume the AudioContext. Call from a user gesture (iOS autoplay rules). */
@@ -39,6 +45,11 @@ class VoicePlayer {
       this.analyser.smoothingTimeConstant = 0;
       this.samples = new Float32Array(this.analyser.fftSize);
       this.analyser.connect(this.ctx.destination);
+      // Safari pauses ("interrupts") the context when the mic or speech recognition takes
+      // the audio session; pick it back up if we still have something to say.
+      this.ctx.onstatechange = () => {
+        if (this.ctx?.state !== "running" && (this.sources.size || this.pending)) this.ensureRunning();
+      };
     }
     if (this.ctx.state !== "running") void this.ctx.resume();
     // A one-sample silent buffer started inside the gesture fully unlocks iOS Safari.
@@ -142,8 +153,30 @@ class VoicePlayer {
     });
   }
 
+  private blockedWatch: ReturnType<typeof setTimeout> | undefined;
+
+  /** Resume a paused context; if the browser still refuses, ask for a tap. */
+  private ensureRunning() {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state === "running") return;
+    void ctx.resume().catch(() => {});
+    clearTimeout(this.blockedWatch);
+    this.blockedWatch = setTimeout(() => {
+      if (!this.ctx || this.ctx.state === "running" || !(this.sources.size || this.pending)) return;
+      this.blockedHandler();
+      const retry = () => {
+        window.removeEventListener("pointerdown", retry, true);
+        window.removeEventListener("keydown", retry, true);
+        this.unlock();
+      };
+      window.addEventListener("pointerdown", retry, true);
+      window.addEventListener("keydown", retry, true);
+    }, 800);
+  }
+
   private schedule(buffer: AudioBuffer) {
     const ctx = this.ctx!;
+    this.ensureRunning();
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(this.analyser!);

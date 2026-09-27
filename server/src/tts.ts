@@ -23,7 +23,7 @@ tts.get("/", (c) => c.json({ available: !!(config.elevenlabs.apiKey && config.el
 
 tts.post("/", async (c) => {
   const { apiKey, voiceId, modelId, url } = config.elevenlabs;
-  if (!apiKey || !voiceId) return c.json({ error: "Voice is not configured on the server" }, 503);
+  if (!apiKey || !voiceId) return c.json({ error: "no ElevenLabs key. Add ELEVENLABS_API_KEY to server/.env on the Mac mini and restart." }, 503);
 
   const body = await c.req.json().catch(() => null);
   const text = typeof body?.text === "string" ? body.text.trim() : "";

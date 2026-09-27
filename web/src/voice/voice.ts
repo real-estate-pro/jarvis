@@ -123,6 +123,9 @@ export function startVoice() {
     useChatStore.setState({ notice: `Voice unavailable: ${err.message}` });
   });
   voicePlayer.onIdle(maybeFollowUp);
+  voicePlayer.onBlocked(() =>
+    useChatStore.setState({ notice: "The browser paused JARVIS's voice. Tap anywhere to hear it." }),
+  );
 
   configureListening({
     onTranscript,
@@ -142,6 +145,9 @@ export function startVoice() {
     if (e.type === "start") {
       stopSpeaking();
       const spoken = voiceTurnPending && source === "live";
+      if (spoken && !useVoiceStore.getState().available) {
+        useChatStore.setState({ notice: "JARVIS can't speak yet: add ELEVENLABS_API_KEY to server/.env on the Mac mini." });
+      }
       voiceTurnPending = false;
       spokeThisTurn = false;
       followUpArmed = spoken;
