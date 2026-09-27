@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { ApprovalCard } from "./ApprovalCard";
 import { useChatStore } from "./chatStore";
 import { RichText } from "./RichText";
@@ -59,14 +59,60 @@ function Message({ m, live }: { m: ChatMessage; live: boolean }) {
   );
 }
 
+/**
+ * Keeps a scroll container pinned to the bottom as content grows (streaming text), unless
+ * the user has scrolled up to read something.
+ */
+function useStickToBottom() {
+  const scroller = useRef<HTMLDivElement>(null);
+  const content = useRef<HTMLDivElement>(null);
+  const stuck = useRef(true);
+
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    const inner = content.current;
+    if (!el || !inner) return;
+    const toBottom = () => {
+      if (stuck.current) el.scrollTop = el.scrollHeight;
+    };
+    const onScroll = () => {
+      stuck.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    };
+    const observer = new ResizeObserver(toBottom);
+    observer.observe(inner);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    toBottom();
+    return () => {
+      observer.disconnect();
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  return { scroller, content, stuck };
+}
+
 export function Conversation() {
   const messages = useChatStore((s) => s.messages);
   const recent = messages.slice(-VISIBLE);
+  const { scroller, content, stuck } = useStickToBottom();
+  const lastId = recent[recent.length - 1]?.id;
+
+  // Sending a new message always jumps back to the latest.
+  useEffect(() => {
+    stuck.current = true;
+    if (scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight;
+  }, [lastId, stuck, scroller]);
+
   return (
-    <div className="conversation" aria-live="polite">
-      {recent.map((m, i) => (
-        <Message key={m.id} m={m} live={i === recent.length - 1} />
-      ))}
+    <div className="conversation">
+      <div className="conversation-scroll" ref={scroller}>
+        <div className="conversation-inner" ref={content} aria-live="polite">
+          {recent.map((m, i) => (
+            <Message key={m.id} m={m} live={i === recent.length - 1} />
+          ))}
+        </div>
+      </div>
+      {/* Outside the scroll area so it can never be clipped out of view. */}
       <ApprovalCard />
     </div>
   );

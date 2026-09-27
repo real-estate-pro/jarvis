@@ -14,6 +14,7 @@ let seq = 0;
 function json(res, status, body) { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(body)); }
 async function body(req) { let s = ""; for await (const c of req) s += c; return s ? JSON.parse(s) : {}; }
 
+const LONG_REPLY = "Here's what it looks like around **Lexington, KY**:\n\n**Right now:** ~83°F, partly cloudy, humidity 67%, feels like 88°F\n\n**Today:** Showers and thunderstorms possible (mainly after 2pm), high near 82°F, 90% chance of rain.\n\n**Tonight:** Showers likely before 10pm, low around 69°F.\n\n### Rest of the week\n- **Friday:** High 82°F, mostly cloudy\n- **Saturday:** High 85°F, showers likely\n- **Sunday:** High 87°F, mostly sunny\n- **Monday:** High 89°F, sunny\n- **Tuesday:** High 91°F, slight storm chance\n\nHot and humid heading into the weekend. Source: [weather.gov](https://weather.gov). Want the `hourly` forecast?";
 const REPLY = "Good evening, sir. I checked the system: all services are nominal. The Mac mini has been up for three days.\n\n```sh\nuptime\n```\n\nAnything else?";
 
 async function runTurn(res, sessionId, message, write) {
@@ -40,7 +41,8 @@ async function runTurn(res, sessionId, message, write) {
   await sleep(300);
   await write("tool.completed", { run_id: runId, tool_name: "web_search", preview: "ok" });
   let text = "";
-  for (const tok of REPLY.split(/(?<= )/)) {
+  const reply = /weather|long/i.test(message) ? LONG_REPLY : REPLY;
+  for (const tok of reply.split(/(?<= )/)) {
     if (run.stop) {
       await write("assistant.completed", { run_id: runId, content: text, completed: false, interrupted: true });
       await write("run.cancelled", { run_id: runId, completed: false, interrupted: true });
@@ -49,7 +51,7 @@ async function runTurn(res, sessionId, message, write) {
     }
     text += tok;
     await write("assistant.delta", { run_id: runId, message_id: "msg_1", delta: tok });
-    await sleep(/stop/i.test(message) ? 250 : 40);
+    await sleep(/stop/i.test(message) ? 250 : 15);
   }
   s.messages.push({ role: "assistant", content: text, timestamp: Date.now() / 1000 });
   await write("assistant.completed", { run_id: runId, content: text, completed: true });
