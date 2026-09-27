@@ -1,0 +1,20 @@
+{
+  "name": "jarvis",
+  "private": true,
+  "description": "J.A.R.V.I.S. holographic dashboard for Hermes Agent (jarvisbykush.us)",
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "dev": "npm run dev:server & npm run dev:web; wait",
+    "dev:web": "npm run dev -w web",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "npm run start -w server",
+    "typecheck": "npm run typecheck -w web && npm run typecheck -w server"
+  }
+}

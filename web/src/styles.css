@@ -1,0 +1,107 @@
+:root {
+  --bg-0: #05080d;
+  --bg-1: #0b1420;
+  --gold: #ffb02e;
+  --gold-mid: #ff8a00;
+  --gold-hi: #ffe2a1;
+  --hot: #fff6e0;
+  --chrome-cyan: rgba(111, 211, 255, 0.08);
+  --font-label: "Orbitron", "Rajdhani", system-ui, sans-serif;
+  --font-ui: "Rajdhani", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-0);
+  color: var(--gold-hi);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(255, 226, 161, 0.55);
+  text-transform: uppercase;
+}
+
+.hud-corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hud-corner.tl {
+  top: max(16px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+}
+
+.hud-corner.bl {
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+}
+
+.hud-corner.tr {
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  align-items: flex-end;
+}
+
+.hud-title {
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  color: rgba(255, 226, 161, 0.75);
+}
+
+.hud-rule {
+  width: 64px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 176, 46, 0.6), transparent);
+}
+
+.hud-mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: rgba(255, 176, 46, 0.25);
+  vertical-align: 1px;
+}
+
+.dot.on {
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+}

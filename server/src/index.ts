@@ -1,0 +1,34 @@
+import { existsSync } from "node:fs";
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { Hono } from "hono";
+import { assertSafeConfig, config } from "./config.js";
+
+assertSafeConfig();
+
+const app = new Hono();
+const startedAt = Date.now();
+
+app.get("/api/health", (c) =>
+  c.json({
+    ok: true,
+    service: "jarvis-web",
+    uptimeSec: Math.round((Date.now() - startedAt) / 1000),
+  }),
+);
+
+app.all("/api/*", (c) => c.json({ error: "not_found" }, 404));
+
+// Serve the built frontend in production (in dev, Vite serves it and proxies /api here).
+if (existsSync(config.paths.webDist)) {
+  const root = config.paths.webDist;
+  app.use("/*", serveStatic({ root }));
+  // SPA fallback.
+  app.get("*", serveStatic({ root, path: "index.html" }));
+} else {
+  console.warn(`[web] ${config.paths.webDist} not found; run \`npm run build -w web\` to serve the UI from here.`);
+}
+
+serve({ fetch: app.fetch, hostname: config.host, port: config.port }, (info) => {
+  console.log(`[jarvis-web] listening on http://${info.address}:${info.port} (${config.nodeEnv})`);
+});
