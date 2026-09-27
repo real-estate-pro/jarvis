@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,7 +37,9 @@ export const config = {
   },
   auth: {
     passphraseHash: str("DASHBOARD_PASSPHRASE_HASH"),
-    sessionSecret: str("SESSION_SECRET"),
+    // Without a configured secret (development only), sessions last until the next restart.
+    sessionSecret: str("SESSION_SECRET") || randomBytes(32).toString("hex"),
+    sessionSecretConfigured: !!str("SESSION_SECRET"),
   },
   cfAccess: {
     teamDomain: str("CF_ACCESS_TEAM_DOMAIN"),
@@ -54,6 +57,26 @@ export function assertSafeConfig(): void {
   if (config.isProduction && config.cfAccess.devBypass) {
     console.error("[config] DEV_BYPASS_ACCESS=true is not allowed when NODE_ENV=production. Refusing to start.");
     process.exit(1);
+  }
+  if (config.isProduction) {
+    const missing = [
+      !config.auth.passphraseHash && "DASHBOARD_PASSPHRASE_HASH (run `npm run hash-passphrase`)",
+      !config.auth.sessionSecretConfigured && "SESSION_SECRET",
+      !config.cfAccess.teamDomain && "CF_ACCESS_TEAM_DOMAIN",
+      !config.cfAccess.aud && "CF_ACCESS_AUD",
+    ].filter(Boolean);
+    if (missing.length) {
+      console.error(`[config] Refusing to start in production without: ${missing.join(", ")}`);
+      process.exit(1);
+    }
+    if (config.auth.sessionSecret.length < 32) {
+      console.error("[config] SESSION_SECRET must be at least 32 characters. Refusing to start.");
+      process.exit(1);
+    }
+  } else {
+    if (config.cfAccess.devBypass) console.warn("[config] DEV_BYPASS_ACCESS=true: Cloudflare Access is not being checked (local development only).");
+    if (!config.auth.passphraseHash) console.warn("[config] No DASHBOARD_PASSPHRASE_HASH yet: run `npm run hash-passphrase`.");
+    if (!config.auth.sessionSecretConfigured) console.warn("[config] No SESSION_SECRET: sessions will end when the server restarts.");
   }
   if (!Number.isInteger(config.port) || config.port <= 0) {
     console.error(`[config] Invalid PORT: ${process.env.PORT}`);

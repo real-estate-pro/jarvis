@@ -17,6 +17,7 @@ Requires Node 20.12+.
 ```sh
 npm install
 cp server/.env.example server/.env   # set NODE_ENV=development, DEV_BYPASS_ACCESS=true locally
+npm run hash-passphrase              # choose the lock-screen passphrase
 npm run dev                          # server on :4100, Vite on http://127.0.0.1:5173 (proxies /api)
 ```
 
@@ -42,8 +43,26 @@ The server reads `GET /v1/capabilities` at boot and streams through the Sessions
 Stop uses `POST /v1/runs/{run_id}/stop`; commands Hermes flags for approval show an
 authorization card in the conversation.
 
-> Until milestone 6 (auth) lands, `/api/*` is unauthenticated. The server only listens on
-> 127.0.0.1, so do not point cloudflared at it yet.
+
+### Security
+
+Two layers, both enforced by the server:
+
+1. **Cloudflare Access**: every request (page and API) must carry a valid
+   `Cf-Access-Jwt-Assertion` signed by the team's keys for `CF_ACCESS_AUD`; anything else gets
+   403. `DEV_BYPASS_ACCESS=true` skips this for local work and is refused when
+   `NODE_ENV=production`.
+2. **Passphrase**: the lock screen verifies against an argon2id hash and sets a signed,
+   HttpOnly, SameSite=Strict (and Secure in production) session cookie for 30 days. Five wrong
+   attempts in 15 minutes lock that IP out for 15 minutes, doubling each time (max 24 h).
+   Changing the passphrase signs out every session.
+
+```sh
+npm run hash-passphrase   # prompts twice (hidden), saves the hash + a SESSION_SECRET to server/.env
+```
+
+In production the server refuses to start unless the passphrase hash, session secret and
+both Cloudflare Access values are set. Responses carry a strict Content-Security-Policy.
 
 ### Voice
 
@@ -76,6 +95,6 @@ Append to the URL while tuning the look:
 - [x] 3. Chat plumbing
 - [x] 4. State-driven animation
 - [x] 5. Voice
-- [ ] 6. Auth
+- [x] 6. Auth
 - [ ] 7. Ops
 - [ ] 8. Polish

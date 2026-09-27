@@ -15,6 +15,8 @@ const ERROR_HOLD_MS = 1300;
 const TAG_FADE_MS = 700;
 
 const state = {
+  locked: true,
+  poweringUp: false,
   busy: false,
   streaming: false,
   focused: false,
@@ -24,6 +26,8 @@ const state = {
 let errorTimer: ReturnType<typeof setTimeout> | undefined;
 
 function modeNow(): OrbMode {
+  if (state.locked) return "locked";
+  if (state.poweringUp) return "powerup";
   if (Date.now() < state.errorUntil) return "error";
   if (useListenStore.getState().phase === "listening") return "listening";
   if (useVoiceStore.getState().speaking) return "speaking";
@@ -105,6 +109,24 @@ export function startOrbDirector() {
     if (s.phase !== prev.phase) recompute();
   });
   recompute();
+}
+
+export function setLocked(locked: boolean) {
+  state.locked = locked;
+  recompute();
+}
+
+/** The unlock flourish: shockwave, energy surge, rings out, then settle to idle. */
+export function powerUp() {
+  state.locked = false;
+  state.poweringUp = true;
+  drive.ping();
+  drive.pulse(1);
+  recompute();
+  setTimeout(() => {
+    state.poweringUp = false;
+    recompute();
+  }, 1500);
 }
 
 export function setInputFocused(focused: boolean) {

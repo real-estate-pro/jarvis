@@ -15,6 +15,7 @@
     "dev:server": "npm run dev -w server",
     "build": "npm run build -w web && npm run build -w server",
     "start": "npm run start -w server",
-    "typecheck": "npm run typecheck -w web && npm run typecheck -w server"
+    "typecheck": "npm run typecheck -w web && npm run typecheck -w server",
+    "hash-passphrase": "npm run hash-passphrase -w server"
   }
 }

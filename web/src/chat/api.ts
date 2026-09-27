@@ -1,5 +1,14 @@
 import type { ChatEvent } from "./types";
 
+/** Any 401 from the server means the session ended; the auth store re-locks the UI. */
+let unauthorizedHandler: () => void = () => {};
+export function setUnauthorizedHandler(fn: () => void) {
+  unauthorizedHandler = fn;
+}
+export function reportUnauthorized() {
+  unauthorizedHandler();
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -10,6 +19,7 @@ export class ApiError extends Error {
 }
 
 async function fail(res: Response): Promise<never> {
+  if (res.status === 401) reportUnauthorized();
   const body = await res.json().catch(() => null);
   throw new ApiError(body?.error ?? `Request failed (${res.status})`, res.status);
 }

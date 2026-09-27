@@ -243,7 +243,8 @@ void main() {
   // Thin scanning line inside the panel.
   float scan = exp(-pow((row - fract(uTime * 0.25 + vSeed)) * 40.0, 2.0)) * 0.25;
   vec3 col = mix(uColCore, uColHi, 0.35) * (m + scan * step(0.02, m + 0.03));
-  col *= vFade * 0.62 * uBrightness;
+  // Panels only appear once the orb is awake (hidden on the dim lock screen).
+  col *= vFade * 0.62 * uBrightness * smoothstep(0.45, 0.8, uBrightness);
   gl_FragColor = vec4(desat(col, uDesat * 0.6), 1.0);
 }
 `;

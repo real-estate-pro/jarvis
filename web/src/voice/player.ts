@@ -1,3 +1,5 @@
+import { reportUnauthorized } from "../chat/api";
+
 /**
  * Plays TTS clips back to back with no gaps, in order, while fetching ahead. All audio
  * runs through one AnalyserNode so the orb can follow the real speech amplitude.
@@ -115,6 +117,7 @@ class VoicePlayer {
         signal: abort.signal,
       });
       if (!res.ok) {
+        if (res.status === 401) reportUnauthorized();
         const body = await res.json().catch(() => null);
         throw new TtsError(body?.error ?? `Voice request failed (${res.status})`);
       }

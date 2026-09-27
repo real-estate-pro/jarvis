@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { secureHeaders } from "hono/secure-headers";
+import { accessGuard, auth, originGuard, sessionGuard } from "./auth.js";
 import { chat } from "./chat.js";
 import { assertSafeConfig, config } from "./config.js";
 import { hermes } from "./hermes.js";
@@ -13,6 +15,31 @@ assertSafeConfig();
 
 const app = new Hono();
 const startedAt = Date.now();
+
+app.use(
+  "*",
+  secureHeaders({
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      mediaSrc: ["'self'", "blob:"],
+      connectSrc: ["'self'"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'none'"],
+      formAction: ["'self'"],
+    },
+    referrerPolicy: "no-referrer",
+  }),
+);
+// Every request (UI included) must come through Cloudflare Access.
+app.use("*", accessGuard);
+app.use("/api/*", originGuard);
+app.route("/api/auth", auth);
+// Everything else under /api needs an unlocked session.
+app.use("/api/*", sessionGuard);
 
 app.get("/api/health", (c) =>
   c.json({

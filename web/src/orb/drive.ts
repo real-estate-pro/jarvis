@@ -6,7 +6,16 @@ import { palette } from "./palette";
  * values ease toward them (frame-rate independent), and rotation is integrated from speed
  * rather than computed from absolute time, so speed changes never make anything jump.
  */
-export type OrbMode = "idle" | "attentive" | "listening" | "thinking" | "responding" | "speaking" | "error";
+export type OrbMode =
+  | "locked"
+  | "powerup"
+  | "idle"
+  | "attentive"
+  | "listening"
+  | "thinking"
+  | "responding"
+  | "speaking"
+  | "error";
 
 export interface DriveParams {
   /** Rotation speed multiplier for the shell, bands, globe and streaks. */
@@ -48,6 +57,10 @@ const IDLE: DriveParams = {
 };
 
 const PRESETS: Record<OrbMode, DriveParams> = {
+  // Lock screen: dim, slow, drawn in.
+  locked: { ...IDLE, spin: 0.45, coreSpin: 0.5, brightness: 0.3, flicker: 0.3, spread: 0.9, breath: 0.012 },
+  // Unlock: energy ramps, rings expand, everything spins up for a moment.
+  powerup: { ...IDLE, spin: 2.4, coreSpin: 3.2, brightness: 1.4, flicker: 2, spread: 1.07, energy: 0.55, sweep: 1, sweepSpeed: 2.4 },
   idle: IDLE,
   attentive: { ...IDLE, brightness: 1.15, spread: 0.965, sweep: 1, sweepSpeed: 0.45 },
   // Hearing you: drawn in and bright, the sweep circling steadily; your voice level pulses it.

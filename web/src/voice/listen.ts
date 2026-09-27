@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { reportUnauthorized } from "../chat/api";
 
 /**
  * Voice input. Two engines:
@@ -336,6 +337,7 @@ async function startRecorder(followUp: boolean) {
     try {
       const blob = new Blob(chunks, { type: recorder.mimeType || mime || "audio/webm" });
       const res = await fetch("/api/stt", { method: "POST", headers: { "Content-Type": blob.type }, body: blob });
+      if (res.status === 401) reportUnauthorized();
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error ?? `Transcription failed (${res.status})`);
       finish(body?.text ?? "");

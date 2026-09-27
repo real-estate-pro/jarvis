@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useAuthStore } from "../auth/authStore";
+import { reportUnauthorized } from "../chat/api";
 import { perfStats } from "../orb/perf";
 import { useOrbStore } from "../state/orbStore";
 import { useVoiceStore } from "../voice/voice";
@@ -48,7 +50,10 @@ function useStatus() {
   const [status, setStatus] = useState<Status | null | "down">(null);
   useInterval(() => {
     fetch("/api/status", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((r) => {
+        if (r.status === 401) reportUnauthorized();
+        return r.ok ? r.json() : Promise.reject();
+      })
       .then(setStatus)
       .catch(() => setStatus("down"));
   }, 10_000);
@@ -100,6 +105,9 @@ export function Hud() {
         <span className="hud-rule" />
         <HermesStatus status={status} />
         <FpsMeter />
+        <button className="hud-toggle hud-lock" onClick={() => void useAuthStore.getState().lock()}>
+          LOCK
+        </button>
       </div>
       <div className="hud-corner tr">
         <Clock />

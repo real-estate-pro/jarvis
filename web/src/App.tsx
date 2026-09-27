@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useAuthStore } from "./auth/authStore";
+import { LockScreen } from "./auth/LockScreen";
 import { ChatLayer } from "./chat/ChatLayer";
 import { Hud } from "./hud/Hud";
 import { ToolTags } from "./hud/ToolTags";
@@ -7,16 +9,29 @@ import { Scene } from "./orb/Scene";
 import { startVoice } from "./voice/voice";
 
 export function App() {
+  const status = useAuthStore((s) => s.status);
+
   useEffect(() => {
     startOrbDirector();
-    startVoice();
+    void useAuthStore.getState().check();
   }, []);
+
+  useEffect(() => {
+    if (status === "welcome" || status === "unlocked") startVoice();
+  }, [status]);
+
   return (
     <>
       <Scene />
-      <Hud />
-      <ToolTags />
-      <ChatLayer />
+      {status === "unlocked" ? (
+        <>
+          <Hud />
+          <ToolTags />
+          <ChatLayer />
+        </>
+      ) : (
+        <LockScreen />
+      )}
     </>
   );
 }
