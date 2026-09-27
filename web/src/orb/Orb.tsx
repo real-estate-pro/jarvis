@@ -2,6 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
 import { debug } from "../debug";
+import { micLevel } from "../voice/listen";
 import { voicePlayer } from "../voice/player";
 import { drive, uniforms } from "./drive";
 import { RibbonLayer } from "./layers/RibbonLayer";
@@ -16,7 +17,7 @@ import { Sweep } from "./layers/Sweep";
 /** Advances the shared drive once per frame, before any layer reads it. */
 function DriveTicker() {
   useFrame((_, dt) => {
-    drive.inputLevel = voicePlayer.level();
+    drive.inputLevel = Math.max(voicePlayer.level(), micLevel() * 0.8);
     drive.update(dt);
   });
   return null;

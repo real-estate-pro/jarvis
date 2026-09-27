@@ -2,6 +2,7 @@ import { onChatEvent } from "../chat/chatStore";
 import type { ChatEvent } from "../chat/types";
 import { debug } from "../debug";
 import { useOrbStore } from "../state/orbStore";
+import { useListenStore } from "../voice/listen";
 import { useVoiceStore } from "../voice/voice";
 import { drive, type OrbMode } from "./drive";
 
@@ -24,6 +25,7 @@ let errorTimer: ReturnType<typeof setTimeout> | undefined;
 
 function modeNow(): OrbMode {
   if (Date.now() < state.errorUntil) return "error";
+  if (useListenStore.getState().phase === "listening") return "listening";
   if (useVoiceStore.getState().speaking) return "speaking";
   if (state.busy) return state.streaming ? "responding" : "thinking";
   if (state.focused) return "attentive";
@@ -98,6 +100,9 @@ export function startOrbDirector() {
   onChatEvent(onEvent);
   useVoiceStore.subscribe((s, prev) => {
     if (s.speaking !== prev.speaking) recompute();
+  });
+  useListenStore.subscribe((s, prev) => {
+    if (s.phase !== prev.phase) recompute();
   });
   recompute();
 }

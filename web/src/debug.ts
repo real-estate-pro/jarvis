@@ -3,7 +3,7 @@ import type { OrbMode } from "./orb/drive";
 /**
  * Dev-only view switches, read from the URL: `?fx=0` disables post-processing,
  * `?layers=shell,globe` renders only the named orb layers, and `?mode=thinking` pins the
- * orb in one state (idle, attentive, thinking, responding, speaking, error).
+ * orb in one state (idle, attentive, listening, thinking, responding, speaking, error).
  */
 const params = new URLSearchParams(typeof location !== "undefined" ? location.search : "");
 const layerList = params.get("layers");

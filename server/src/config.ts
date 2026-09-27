@@ -32,6 +32,7 @@ export const config = {
     apiKey: str("ELEVENLABS_API_KEY"),
     voiceId: str("ELEVENLABS_VOICE_ID"),
     modelId: str("ELEVENLABS_MODEL_ID", "eleven_flash_v2_5"),
+    sttModelId: str("ELEVENLABS_STT_MODEL_ID", "scribe_v1"),
   },
   auth: {
     passphraseHash: str("DASHBOARD_PASSPHRASE_HASH"),

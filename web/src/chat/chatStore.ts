@@ -9,6 +9,8 @@ interface ChatState {
   approval: Approval | null;
   /** Transient notice shown near the input (errors, "busy", etc.). */
   notice: string | null;
+  /** Unsent text in the input box (typed, or a transcript held while JARVIS was busy). */
+  draft: string;
   loadHistory: () => Promise<void>;
   send: (text: string) => Promise<void>;
   stop: () => Promise<void>;
@@ -108,6 +110,7 @@ export const useChatStore = create<ChatState>((set, get) => {
     busy: false,
     approval: null,
     notice: null,
+    draft: "",
 
     async loadHistory() {
       const { messages, busy } = await getJson<{ messages: { role: "user" | "assistant"; text: string }[]; busy: boolean }>(

@@ -81,6 +81,12 @@ http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   const p = url.pathname;
   if (p === "/health") return json(res, 200, { status: "ok" });
+  if (p === "/v1/speech-to-text") {
+    if (req.headers["xi-api-key"] !== "el-test") return json(res, 401, { detail: { message: "Invalid API key" } });
+    let size = 0; for await (const c of req) size += c.length;
+    console.log("stt: received", size, "bytes");
+    return json(res, 200, { text: "What is the weather in Lexington?" });
+  }
   if (p.startsWith("/v1/text-to-speech/")) {
     if (req.headers["xi-api-key"] !== "el-test") return json(res, 401, { detail: { message: "Invalid API key" } });
     const b = await body(req);

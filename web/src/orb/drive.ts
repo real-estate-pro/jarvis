@@ -6,7 +6,7 @@ import { palette } from "./palette";
  * values ease toward them (frame-rate independent), and rotation is integrated from speed
  * rather than computed from absolute time, so speed changes never make anything jump.
  */
-export type OrbMode = "idle" | "attentive" | "thinking" | "responding" | "speaking" | "error";
+export type OrbMode = "idle" | "attentive" | "listening" | "thinking" | "responding" | "speaking" | "error";
 
 export interface DriveParams {
   /** Rotation speed multiplier for the shell, bands, globe and streaks. */
@@ -50,6 +50,8 @@ const IDLE: DriveParams = {
 const PRESETS: Record<OrbMode, DriveParams> = {
   idle: IDLE,
   attentive: { ...IDLE, brightness: 1.15, spread: 0.965, sweep: 1, sweepSpeed: 0.45 },
+  // Hearing you: drawn in and bright, the sweep circling steadily; your voice level pulses it.
+  listening: { ...IDLE, coreSpin: 1.6, brightness: 1.22, spread: 0.94, flicker: 1.3, energy: 0.08, sweep: 1, sweepSpeed: 0.9 },
   thinking: { ...IDLE, spin: 2.6, coreSpin: 3.5, brightness: 1.12, flicker: 2.2, energy: 0.3, sweep: 1, sweepSpeed: 1.6, breath: 0.02 },
   responding: { ...IDLE, spin: 1.6, coreSpin: 2, brightness: 1.1, flicker: 1.4, energy: 0.1, sweep: 0.35, sweepSpeed: 0.8 },
   speaking: { ...IDLE, spin: 1.4, coreSpin: 1.8, brightness: 1.08, flicker: 1.2, sweep: 0.25, sweepSpeed: 0.6 },

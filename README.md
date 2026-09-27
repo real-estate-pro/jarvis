@@ -54,13 +54,20 @@ code (read as "I've put the code on screen."), URLs (domain only) and emoji, the
 orb follows the real audio amplitude. The server logs a running per-day character count
 (`[tts] 2026-09-27: 1,234 chars today`) to keep an eye on credits.
 
+### Talking to JARVIS
+
+The mic button in the input line listens with the browser's built-in speech recognition
+(falling back to recording + ElevenLabs Scribe via `/api/stt` where that isn't available).
+Words appear as you speak and send when you pause. Answers to spoken questions are spoken back,
+and the mic then reopens for a follow-up, so a conversation needs no clicks after the first.
+
 ### Orb debug switches
 
 Append to the URL while tuning the look:
 
 - `?fx=0` disables post-processing (bloom, grain, vignette)
 - `?layers=shell,globe,bands,streaks,core,panels,sweep` renders only the listed layers
-- `?mode=idle|attentive|thinking|responding|speaking|error` pins the orb in one state
+- `?mode=idle|attentive|listening|thinking|responding|speaking|error` pins the orb in one state
 
 ## Milestones
 

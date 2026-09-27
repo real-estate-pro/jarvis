@@ -17,8 +17,9 @@ marked **ASSUMED**, keep it unless Kush says otherwise.
 4. A voice toggle. When ON, replies are spoken with ElevenLabs voice ID
    `Fahco4VZzobUeiPqni1S`, and the hologram pulses to the actual audio amplitude.
 5. When idle, the hologram is never static: slow, smooth, minimal, continuous motion.
+6. Talk to JARVIS as well as type (added after v1 planning; see §5b).
 
-Non-goals for v1: speech-to-text input, multi-user support, editing Hermes config from the UI.
+Non-goals for v1: multi-user support, editing Hermes config from the UI, an always-on wake word.
 
 ---
 
@@ -139,6 +140,18 @@ Implementation:
 - Toggling OFF mid-reply stops audio immediately and clears the queue.
 - Server: cache nothing to disk; add a simple per-day character counter in logs so Kush can
   watch credit usage.
+
+### 5b. Voice input (speech-to-text)
+- Mic button in the input line. Tap and talk; words appear live in the input; the take ends
+  after ~1.3 s of silence and is sent. Tap again to send now; Esc cancels.
+- Engine: the browser's built-in SpeechRecognition (Safari → Apple, Chrome → Google). Where it
+  is missing or refuses to run (e.g. some home-screen web apps), fall back to recording with
+  MediaRecorder + level-based end-of-speech detection, transcribed server-side by
+  `POST /api/stt` → ElevenLabs Scribe (`ELEVENLABS_STT_MODEL_ID`, default `scribe_v1`).
+- Replies to spoken questions are always spoken (the VOICE toggle governs typed ones). Once that
+  answer has been fully spoken, the mic reopens for a follow-up and closes quietly after ~6 s
+  of silence: a hands-free back-and-forth. Tapping the mic while JARVIS talks cuts it off.
+- Orb "listening" state: drawn in and bright, sweep circling; the mic level pulses it.
 
 ---
 
@@ -270,4 +283,6 @@ DEV_BYPASS_ACCESS=false
 - [ ] Reply text streams; orb visibly reacts per state; tool names appear during tool use.
 - [ ] Voice ON: speech starts within ~1–2 s of the first sentence; orb pulses to audio.
 - [ ] Voice OFF mid-sentence stops audio instantly.
+- [ ] Mic: spoken question is transcribed and sent; the spoken answer is followed by follow-up
+      listening; saying nothing closes the mic without sending.
 - [ ] Works on iPhone Safari and as a home-screen app.

@@ -19,6 +19,9 @@ class VoicePlayer {
   private inFlight = 0;
   private readonly waiting: (() => void)[] = [];
   private previousText = "";
+  /** Clips queued but not yet scheduled (fetching / decoding). */
+  private pending = 0;
+  private readonly idleListeners = new Set<() => void>();
   private readonly listeners = new Set<(speaking: boolean) => void>();
   private errorHandler: (err: Error) => void = () => {};
 
@@ -57,6 +60,18 @@ class VoicePlayer {
 
   private notify() {
     for (const fn of this.listeners) fn(this.speaking);
+    if (!this.speaking && !this.pending) for (const fn of this.idleListeners) fn();
+  }
+
+  /** Nothing playing and nothing queued. */
+  get idle() {
+    return !this.speaking && !this.pending;
+  }
+
+  /** Fires when the last queued clip has finished playing (not between clips). */
+  onIdle(fn: () => void) {
+    this.idleListeners.add(fn);
+    return () => this.idleListeners.delete(fn);
   }
 
   private async slot() {
@@ -107,6 +122,7 @@ class VoicePlayer {
     const gen = this.generation;
     const clip = this.fetchClip(text, this.previousText, gen);
     this.previousText = text;
+    this.pending++;
     clip.catch(() => {}); // handled in the chain below
     this.chain = this.chain.then(async () => {
       let buffer: AudioBuffer | null = null;
@@ -119,7 +135,10 @@ class VoicePlayer {
         }
         return;
       }
-      if (buffer && gen === this.generation) this.schedule(buffer);
+      if (gen !== this.generation) return;
+      this.pending--;
+      if (buffer) this.schedule(buffer);
+      else this.notify();
     });
   }
 
@@ -154,6 +173,7 @@ class VoicePlayer {
     }
     const wasSpeaking = this.sources.size > 0;
     this.sources.clear();
+    this.pending = 0;
     this.nextStart = 0;
     this.previousText = "";
     this.chain = Promise.resolve();
