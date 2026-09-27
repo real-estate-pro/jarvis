@@ -159,8 +159,8 @@ function buildPanels(): InstancedBufferGeometry {
   const g = new InstancedBufferGeometry();
   g.setAttribute("position", new Float32BufferAttribute([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0], 3));
   g.setIndex([0, 1, 2, 0, 2, 3]);
-  // Favor the left and upper sides; the conversation will live below / right.
-  const anchors = [150, 195, 115, 40, 78, 235, 330];
+  // Favor the left and upper sides; the conversation lives below / right.
+  const anchors = [150, 195, 115, 40, 78, 235, 262];
   const slot = new Float32Array(PANELS * 4); // base angle, distance, depth, period
   const look = new Float32Array(PANELS * 4); // width, height, seed, unused
   for (let i = 0; i < PANELS; i++) {

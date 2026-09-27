@@ -105,3 +105,335 @@ body,
   background: var(--gold);
   box-shadow: 0 0 6px var(--gold);
 }
+
+/* ---------- HUD buttons ---------- */
+
+.hud-btn {
+  pointer-events: auto;
+  appearance: none;
+  border: 1px solid rgba(255, 176, 46, 0.28);
+  background: rgba(255, 176, 46, 0.04);
+  color: rgba(255, 226, 161, 0.7);
+  font-family: var(--font-label);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    opacity 0.2s;
+}
+
+.hud-btn:hover:not(:disabled),
+.hud-btn:focus-visible {
+  background: rgba(255, 176, 46, 0.12);
+  border-color: rgba(255, 176, 46, 0.6);
+  color: var(--hot);
+  outline: none;
+}
+
+.hud-btn.primary {
+  border-color: rgba(255, 176, 46, 0.5);
+  color: var(--gold-hi);
+}
+
+.hud-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ---------- Chat ---------- */
+
+.chat-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.conversation {
+  position: absolute;
+  right: max(4vw, 24px);
+  bottom: calc(120px + env(safe-area-inset-bottom));
+  width: min(32vw, 440px);
+  max-height: 58vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+  overflow: hidden;
+  pointer-events: auto;
+  /* Older exchanges fade out upward. */
+  -webkit-mask-image: linear-gradient(to top, #000 62%, transparent);
+  mask-image: linear-gradient(to top, #000 62%, transparent);
+}
+
+.msg {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.msg.assistant {
+  color: rgba(255, 200, 120, 0.88);
+  text-shadow: 0 0 12px rgba(255, 138, 0, 0.35);
+}
+
+.msg.user {
+  align-self: flex-end;
+  max-width: 85%;
+  text-align: right;
+  color: rgba(255, 226, 161, 0.45);
+}
+
+.msg-code {
+  margin: 8px 0;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  color: rgba(255, 226, 161, 0.85);
+  background: rgba(255, 176, 46, 0.05);
+  border-left: 1px solid rgba(255, 176, 46, 0.4);
+}
+
+.msg-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.tool-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: 100%;
+  font-family: var(--font-label);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 226, 161, 0.55);
+  white-space: nowrap;
+}
+
+.tool-tag.running {
+  color: var(--gold-hi);
+}
+
+.tool-tag.failed {
+  color: rgba(255, 226, 161, 0.35);
+}
+
+.tool-glyph {
+  font-family: var(--font-mono);
+}
+
+.tool-tag.running .tool-glyph {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.tool-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 22ch;
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.7;
+}
+
+.msg-commentary {
+  font-size: 12px;
+  color: rgba(255, 200, 120, 0.5);
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.msg-waiting {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: rgba(255, 226, 161, 0.55);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.msg-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: rgba(255, 226, 161, 0.4);
+}
+
+.stream-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  background: rgba(255, 176, 46, 0.7);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Input ---------- */
+
+.input-dock {
+  position: absolute;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(720px, calc(100vw - 32px));
+  pointer-events: auto;
+}
+
+.input-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.input-notice {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255, 226, 161, 0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px 4px 10px 14px;
+  background: linear-gradient(180deg, rgba(11, 20, 32, 0.35), rgba(11, 20, 32, 0.6));
+  border-bottom: 1px solid rgba(255, 176, 46, 0.45);
+  box-shadow: 0 1px 0 rgba(111, 211, 255, 0.06);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: border-color 0.3s;
+}
+
+.input-line:focus-within {
+  border-bottom-color: rgba(255, 176, 46, 0.85);
+}
+
+.input-line textarea {
+  flex: 1;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--gold-hi);
+  caret-color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 16px; /* >=16px keeps iOS from zooming on focus */
+  line-height: 1.4;
+  padding: 2px 0;
+}
+
+.input-line textarea::placeholder {
+  color: rgba(255, 226, 161, 0.3);
+}
+
+/* ---------- Approval ---------- */
+
+.approval {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  background: rgba(5, 8, 13, 0.82);
+  border: 1px solid rgba(255, 176, 46, 0.45);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--gold-hi);
+}
+
+.approval-title {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+}
+
+.approval-desc {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255, 226, 161, 0.7);
+}
+
+.approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ---------- History drawer ---------- */
+
+.history {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(520px, 100vw);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  background: rgba(5, 8, 13, 0.9);
+  border-left: 1px solid rgba(255, 176, 46, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: max(16px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+}
+
+.history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: rgba(255, 226, 161, 0.7);
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 176, 46, 0.15);
+}
+
+.history-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 14px;
+  overscroll-behavior: contain;
+}
+
+/* ---------- Phone layout: orb on top, conversation beneath ---------- */
+
+@media (max-width: 760px), (max-aspect-ratio: 1/1) {
+  .conversation {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    bottom: calc(110px + env(safe-area-inset-bottom));
+    max-height: 36vh;
+  }
+}

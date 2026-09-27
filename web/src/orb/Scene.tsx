@@ -11,15 +11,24 @@ const FOV = 35;
 /** Visual diameter of the orb including the outer streak shell. */
 const ORB_DIAMETER = 2.15;
 
-/** Keeps the orb at ~66% of viewport height on wide screens and ~80% of width on phones. */
+/**
+ * Keeps the orb at ~66% of viewport height on wide screens and ~80% of width on phones,
+ * and slides it aside to make room for the conversation (left on desktop, up on phones).
+ * Must match the phone breakpoint in styles.css.
+ */
 function CameraRig() {
   const camera = useThree((s) => s.camera);
   const { width, height } = useThree((s) => s.size);
   useEffect(() => {
     const aspect = width / Math.max(height, 1);
     const visibleHeight = Math.max(ORB_DIAMETER / 0.66, ORB_DIAMETER / (0.8 * aspect));
-    camera.position.set(0, 0, visibleHeight / 2 / Math.tan(MathUtils.degToRad(FOV / 2)));
-    camera.lookAt(0, 0, 0);
+    const phone = width <= 760 || aspect <= 1;
+    // Target orb center as a fraction of the viewport (x from left, y from top).
+    const [cx, cy] = phone ? [0.5, 0.33] : [0.42, 0.46];
+    const dx = (0.5 - cx) * visibleHeight * aspect;
+    const dy = -(0.5 - cy) * visibleHeight;
+    camera.position.set(dx, dy, visibleHeight / 2 / Math.tan(MathUtils.degToRad(FOV / 2)));
+    camera.lookAt(dx, dy, 0);
   }, [camera, width, height]);
   return null;
 }

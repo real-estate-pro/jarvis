@@ -31,34 +31,63 @@ function FpsMeter() {
   );
 }
 
-function ServerLink() {
-  const [ok, setOk] = useState<boolean | null>(null);
+interface Status {
+  hermes: { online: boolean };
+  system: { uptimeSec: number; cpu: number; memUsed: number };
+}
+
+function formatUptime(sec: number) {
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return d ? `${d}D ${h}H` : h ? `${h}H ${m}M` : `${m}M`;
+}
+
+function useStatus() {
+  const [status, setStatus] = useState<Status | null | "down">(null);
   useInterval(() => {
-    fetch("/api/health", { cache: "no-store" })
-      .then((r) => setOk(r.ok))
-      .catch(() => setOk(false));
+    fetch("/api/status", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setStatus)
+      .catch(() => setStatus("down"));
   }, 10_000);
+  return status;
+}
+
+function HermesStatus({ status }: { status: Status | null | "down" }) {
+  const online = status !== null && status !== "down" && status.hermes.online;
+  const label = status === null ? "…" : status === "down" ? "LINK DOWN" : online ? "ONLINE" : "OFFLINE";
   return (
     <span>
-      <span className={`dot${ok ? " on" : ""}`} />
-      LINK {ok === null ? "…" : ok ? "ONLINE" : "OFFLINE"}
+      <span className={`dot${online ? " on" : ""}`} />
+      HERMES {label}
+    </span>
+  );
+}
+
+function SystemStats({ status }: { status: Status | null | "down" }) {
+  if (!status || status === "down") return null;
+  const { cpu, memUsed, uptimeSec } = status.system;
+  return (
+    <span className="hud-mono">
+      CPU {Math.round(cpu * 100)}% · MEM {Math.round(memUsed * 100)}% · UP {formatUptime(uptimeSec)}
     </span>
   );
 }
 
 export function Hud() {
+  const status = useStatus();
   return (
     <div className="hud">
       <div className="hud-corner tl">
         <span className="hud-title">J.A.R.V.I.S.</span>
         <span className="hud-rule" />
-        <ServerLink />
+        <HermesStatus status={status} />
+        <FpsMeter />
       </div>
       <div className="hud-corner tr">
         <Clock />
-      </div>
-      <div className="hud-corner bl">
-        <FpsMeter />
+        <SystemStats status={status} />
       </div>
     </div>
   );
