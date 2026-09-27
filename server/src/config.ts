@@ -8,8 +8,9 @@ const serverRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const envFile = resolve(serverRoot, ".env");
 if (existsSync(envFile)) process.loadEnvFile(envFile);
 
+/** Env var, trimmed; empty values (e.g. `ELEVENLABS_MODEL_ID=`) fall back to the default. */
 function str(name: string, fallback = ""): string {
-  return (process.env[name] ?? fallback).trim();
+  return (process.env[name] ?? "").trim() || fallback;
 }
 
 function bool(name: string): boolean {
