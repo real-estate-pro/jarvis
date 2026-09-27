@@ -2,6 +2,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { MathUtils } from "three";
 import { debug } from "../debug";
+import { useOrbStore } from "../state/orbStore";
 import { Background } from "./Background";
 import { Orb } from "./Orb";
 import { PerfGovernor } from "./perf";
@@ -29,6 +30,7 @@ function CameraRig() {
     const dy = -(0.5 - cy) * visibleHeight;
     camera.position.set(dx, dy, visibleHeight / 2 / Math.tan(MathUtils.degToRad(FOV / 2)));
     camera.lookAt(dx, dy, 0);
+    useOrbStore.getState().setLayout({ x: cx * width, y: cy * height, radius: height / visibleHeight });
   }, [camera, width, height]);
   return null;
 }

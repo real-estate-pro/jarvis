@@ -49,14 +49,15 @@ authorization card in the conversation.
 Append to the URL while tuning the look:
 
 - `?fx=0` disables post-processing (bloom, grain, vignette)
-- `?layers=shell,globe,bands,streaks,core,panels` renders only the listed layers
+- `?layers=shell,globe,bands,streaks,core,panels,sweep` renders only the listed layers
+- `?mode=idle|attentive|thinking|responding|speaking|error` pins the orb in one state
 
 ## Milestones
 
 - [x] 1. Scaffold: server health route, frontend with FPS meter
 - [x] 2. Orb v1 (idle): approved ([desktop](docs/orb-v1-desktop.jpg), [iPhone](docs/orb-v1-iphone.jpg))
 - [x] 3. Chat plumbing
-- [ ] 4. State-driven animation
+- [x] 4. State-driven animation
 - [ ] 5. Voice
 - [ ] 6. Auth
 - [ ] 7. Ops

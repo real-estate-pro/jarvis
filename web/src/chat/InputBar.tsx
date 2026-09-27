@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { setInputFocused } from "../orb/director";
 import { useChatStore } from "./chatStore";
 
 export function InputBar({ onOpenHistory }: { onOpenHistory: () => void }) {
@@ -54,6 +55,8 @@ export function InputBar({ onOpenHistory }: { onOpenHistory: () => void }) {
           enterKeyHint="send"
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
         {busy ? (
           <button className="hud-btn primary" onClick={() => void stop()} aria-label="Stop">

@@ -437,3 +437,62 @@ body,
     max-height: 36vh;
   }
 }
+
+/* ---------- Tool tags beside the orb ---------- */
+
+.tool-tags {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  max-width: min(40vw, 320px);
+}
+
+.orb-tag {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--gold-hi);
+  text-shadow: 0 0 10px rgba(255, 138, 0, 0.6);
+  animation: tag-in 0.35s ease-out both;
+  transition: opacity 0.6s ease;
+}
+
+.orb-tag.ending {
+  opacity: 0;
+}
+
+.orb-tag-rule {
+  flex: none;
+  width: 22px;
+  height: 1px;
+  align-self: center;
+  background: linear-gradient(90deg, transparent, rgba(255, 176, 46, 0.8));
+}
+
+.orb-tag-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  color: rgba(255, 226, 161, 0.5);
+}
+
+@keyframes tag-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-tag {
+    animation: none;
+  }
+}
