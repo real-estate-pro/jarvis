@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { setInputFocused } from "../orb/director";
+import { stopSpeaking } from "../voice/voice";
 import { useChatStore } from "./chatStore";
 
 export function InputBar({ onOpenHistory }: { onOpenHistory: () => void }) {
@@ -59,7 +60,12 @@ export function InputBar({ onOpenHistory }: { onOpenHistory: () => void }) {
           onBlur={() => setInputFocused(false)}
         />
         {busy ? (
-          <button className="hud-btn primary" onClick={() => void stop()} aria-label="Stop">
+          <button className="hud-btn primary" onClick={() => {
+              stopSpeaking();
+              void stop();
+            }}
+            aria-label="Stop"
+          >
             STOP
           </button>
         ) : (

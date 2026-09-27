@@ -1,6 +1,7 @@
 // Mock Hermes gateway for UI development, following the real wire format
 // (hermes-agent gateway/platforms/api_server.py). Run: node server/dev/mock-hermes.mjs
-// then start the server with HERMES_API_KEY=test-key. Messages containing "approve" trigger an
+// then start the server with HERMES_API_KEY=test-key (and, for voice, ELEVENLABS_API_KEY=el-test
+// ELEVENLABS_API_URL=http://127.0.0.1:8642). Messages containing "approve" trigger an
 // approval prompt; "stop" streams slowly so the Stop button can be tried. MODE=completions
 // exercises the Chat Completions fallback.
 import http from "node:http";
@@ -59,10 +60,35 @@ async function runTurn(res, sessionId, message, write) {
   await write("done", {});
 }
 
+// Mock ElevenLabs TTS (point ELEVENLABS_API_URL here): a warbling tone whose length
+// follows the text, as a WAV so browsers can decode it.
+function toneWav(seconds) {
+  const rate = 22050, n = Math.floor(rate * seconds);
+  const buf = Buffer.alloc(44 + n * 2);
+  buf.write("RIFF", 0); buf.writeUInt32LE(36 + n * 2, 4); buf.write("WAVEfmt ", 8);
+  buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22);
+  buf.writeUInt32LE(rate, 24); buf.writeUInt32LE(rate * 2, 28); buf.writeUInt16LE(2, 32); buf.writeUInt16LE(16, 34);
+  buf.write("data", 36); buf.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) {
+    const t = i / rate;
+    const env = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI * 3.5); // syllable-ish amplitude wobble
+    buf.writeInt16LE(Math.round(Math.sin(t * 2 * Math.PI * 180) * env * 0.35 * 32767), 44 + i * 2);
+  }
+  return buf;
+}
+
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   const p = url.pathname;
   if (p === "/health") return json(res, 200, { status: "ok" });
+  if (p.startsWith("/v1/text-to-speech/")) {
+    if (req.headers["xi-api-key"] !== "el-test") return json(res, 401, { detail: { message: "Invalid API key" } });
+    const b = await body(req);
+    console.log("tts:", JSON.stringify(b.text), b.previous_text ? "(with previous_text)" : "");
+    await sleep(150);
+    res.writeHead(200, { "content-type": "audio/wav" });
+    return res.end(toneWav(Math.min(6, 0.3 + b.text.length * 0.04)));
+  }
   if (req.headers.authorization !== `Bearer ${KEY}`) return json(res, 401, { error: { message: "Invalid API key" } });
   if (p === "/v1/capabilities") return json(res, 200, { object: "hermes.api_server.capabilities", features: { chat_completions: true, run_stop: true, session_chat_streaming: MODE === "sessions", session_resources: true } });
   if (p === "/api/sessions" && req.method === "POST") {

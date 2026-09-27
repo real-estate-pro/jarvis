@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { perfStats } from "../orb/perf";
 import { useOrbStore } from "../state/orbStore";
+import { useVoiceStore } from "../voice/voice";
 
 function useInterval(fn: () => void, ms: number) {
   useEffect(() => {
@@ -75,6 +76,21 @@ function SystemStats({ status }: { status: Status | null | "down" }) {
   );
 }
 
+function VoiceToggle() {
+  const { enabled, available, toggle } = useVoiceStore();
+  return (
+    <button
+      className={`hud-toggle${enabled ? " on" : ""}`}
+      onClick={toggle}
+      disabled={!available && !enabled}
+      aria-pressed={enabled}
+      title={available ? "Speak replies aloud" : "Voice isn't configured on the server"}
+    >
+      VOICE <span className="hud-toggle-glyph">{enabled ? "◉" : "○"}</span> {enabled ? "ON" : "OFF"}
+    </button>
+  );
+}
+
 export function Hud() {
   const status = useStatus();
   return (
@@ -88,6 +104,7 @@ export function Hud() {
       <div className="hud-corner tr">
         <Clock />
         <SystemStats status={status} />
+        <VoiceToggle />
       </div>
     </div>
   );

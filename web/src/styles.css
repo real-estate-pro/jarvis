@@ -575,3 +575,41 @@ body,
 .msg a:hover {
   color: var(--hot);
 }
+
+/* ---------- Voice toggle ---------- */
+
+.hud-toggle {
+  pointer-events: auto;
+  margin-top: 6px;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 4px 0 4px 8px;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: rgba(255, 226, 161, 0.5);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.hud-toggle:hover:not(:disabled),
+.hud-toggle:focus-visible {
+  color: var(--gold-hi);
+  outline: none;
+}
+
+.hud-toggle.on {
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255, 138, 0, 0.6);
+}
+
+.hud-toggle:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.hud-toggle-glyph {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+}

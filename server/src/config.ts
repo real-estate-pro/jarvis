@@ -27,6 +27,7 @@ export const config = {
     apiKey: str("HERMES_API_KEY"),
   },
   elevenlabs: {
+    url: str("ELEVENLABS_API_URL", "https://api.elevenlabs.io").replace(/\/+$/, ""),
     apiKey: str("ELEVENLABS_API_KEY"),
     voiceId: str("ELEVENLABS_VOICE_ID"),
     modelId: str("ELEVENLABS_MODEL_ID", "eleven_flash_v2_5"),

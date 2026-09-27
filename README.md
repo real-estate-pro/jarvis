@@ -24,6 +24,7 @@ Without Hermes running, a mock gateway that speaks the same wire format is avail
 
 ```sh
 node server/dev/mock-hermes.mjs      # listens on 127.0.0.1:8642; set HERMES_API_KEY=test-key
+                                     # (voice: ELEVENLABS_API_KEY=el-test ELEVENLABS_API_URL=http://127.0.0.1:8642)
 ```
 
 Production build, served entirely by the Node server:
@@ -44,6 +45,15 @@ authorization card in the conversation.
 > Until milestone 6 (auth) lands, `/api/*` is unauthenticated. The server only listens on
 > 127.0.0.1, so do not point cloudflared at it yet.
 
+### Voice
+
+With `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` set in `server/.env`, the **VOICE** toggle
+(top right) speaks replies as they stream: text is split into sentences, stripped of markdown,
+code (read as "I've put the code on screen."), URLs (domain only) and emoji, then fetched from
+`/api/tts` (which streams from ElevenLabs) at most two at a time and played back gaplessly. The
+orb follows the real audio amplitude. The server logs a running per-day character count
+(`[tts] 2026-09-27: 1,234 chars today`) to keep an eye on credits.
+
 ### Orb debug switches
 
 Append to the URL while tuning the look:
@@ -58,7 +68,7 @@ Append to the URL while tuning the look:
 - [x] 2. Orb v1 (idle): approved ([desktop](docs/orb-v1-desktop.jpg), [iPhone](docs/orb-v1-iphone.jpg))
 - [x] 3. Chat plumbing
 - [x] 4. State-driven animation
-- [ ] 5. Voice
+- [x] 5. Voice
 - [ ] 6. Auth
 - [ ] 7. Ops
 - [ ] 8. Polish

@@ -24,7 +24,9 @@ function message(role: ChatMessage["role"], text: string, state: ChatMessage["st
 }
 
 /** Other modules (the orb, voice) can follow the live event stream. */
-type Listener = (e: ChatEvent) => void;
+/** "attach" = replayed after re-attaching to a turn already in progress. */
+export type EventSource = "live" | "attach";
+type Listener = (e: ChatEvent, source: EventSource) => void;
 const listeners = new Set<Listener>();
 export function onChatEvent(fn: Listener): () => void {
   listeners.add(fn);
@@ -33,8 +35,8 @@ export function onChatEvent(fn: Listener): () => void {
 
 export const useChatStore = create<ChatState>((set, get) => {
   /** Applies one server event to the streaming assistant message (the last message). */
-  function apply(e: ChatEvent) {
-    for (const fn of listeners) fn(e);
+  function apply(e: ChatEvent, source: EventSource = "live") {
+    for (const fn of listeners) fn(e, source);
     set((s) => {
       const messages = s.messages.slice();
       let last = messages[messages.length - 1];
@@ -92,7 +94,7 @@ export const useChatStore = create<ChatState>((set, get) => {
     if (attached) return;
     attached = true;
     try {
-      const streamed = await streamEvents("/api/chat/active", {}, apply);
+      const streamed = await streamEvents("/api/chat/active", {}, (e) => apply(e, "attach"));
       if (!streamed) set({ busy: false });
     } catch {
       set({ busy: false });

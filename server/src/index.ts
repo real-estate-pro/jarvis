@@ -6,6 +6,7 @@ import { chat } from "./chat.js";
 import { assertSafeConfig, config } from "./config.js";
 import { hermes } from "./hermes.js";
 import { status } from "./status.js";
+import { tts } from "./tts.js";
 
 assertSafeConfig();
 
@@ -22,6 +23,7 @@ app.get("/api/health", (c) =>
 
 app.route("/api/chat", chat);
 app.route("/api/status", status);
+app.route("/api/tts", tts);
 
 app.all("/api/*", (c) => c.json({ error: "not_found" }, 404));
 
