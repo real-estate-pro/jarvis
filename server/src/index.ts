@@ -59,6 +59,14 @@ app.all("/api/*", (c) => c.json({ error: "not_found" }, 404));
 // Serve the built frontend in production (in dev, Vite serves it and proxies /api here).
 if (existsSync(config.paths.webDist)) {
   const root = config.paths.webDist;
+  // Hashed build assets never change; everything else (index.html) must revalidate so a
+  // deploy shows up on the next load, including the home-screen app.
+  app.use("/*", async (c, next) => {
+    await next();
+    if (c.res.ok && !c.res.headers.has("Cache-Control")) {
+      c.header("Cache-Control", c.req.path.startsWith("/assets/") ? "public, max-age=31536000, immutable" : "no-cache");
+    }
+  });
   app.use("/*", serveStatic({ root }));
   // SPA fallback.
   app.get("*", serveStatic({ root, path: "index.html" }));

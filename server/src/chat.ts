@@ -14,14 +14,22 @@ function streamTurn(c: Parameters<typeof streamSSE>[0], turn: Turn) {
     await new Promise<void>((resolve) => {
       // Writes are chained so the terminal event is flushed before the stream closes.
       let writes = Promise.resolve();
+      const send = (write: () => Promise<unknown>) => (writes = writes.then(write).then(() => {}).catch(() => {}));
+      // Cloudflare closes connections that stay silent for ~100 s (long tool runs); a comment
+      // line every 15 s keeps the stream open. Browsers' SSE parsing ignores it.
+      const keepalive = setInterval(() => send(() => stream.write(": keepalive\n\n")), 15_000);
+      const finish = () => {
+        clearInterval(keepalive);
+        resolve();
+      };
       const unsubscribe = turn.subscribe((event: ChatEvent) => {
-        writes = writes.then(() => stream.writeSSE({ data: JSON.stringify(event) })).catch(() => {});
-        if (event.type === "done" || event.type === "error") void writes.then(resolve);
+        send(() => stream.writeSSE({ data: JSON.stringify(event) }));
+        if (event.type === "done" || event.type === "error") void writes.then(finish);
       });
       // The browser going away does not stop the turn; it can re-attach later.
       stream.onAbort(() => {
         unsubscribe();
-        resolve();
+        finish();
       });
     });
   });

@@ -7,7 +7,7 @@ is in [`CLAUDE.md`](CLAUDE.md).
 ```
 web/     Vite + React + TypeScript + three.js (react-three-fiber) frontend
 server/  Node + Hono backend (binds 127.0.0.1:4100, proxies Hermes and ElevenLabs)
-ops/     launchd, cloudflared and setup notes
+ops/     launchd service, deploy + verify scripts, cloudflared example, SETUP.md
 ```
 
 ## Development
@@ -96,5 +96,5 @@ Append to the URL while tuning the look:
 - [x] 4. State-driven animation
 - [x] 5. Voice
 - [x] 6. Auth
-- [ ] 7. Ops
+- [x] 7. Ops: see [ops/SETUP.md](ops/SETUP.md)
 - [ ] 8. Polish

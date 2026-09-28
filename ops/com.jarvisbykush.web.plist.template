@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd user agent for jarvis-web. Don't edit placeholders by hand:
+  ops/install-service.sh fills them in and installs this to ~/Library/LaunchAgents.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jarvisbykush.web</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__NODE__</string>
+    <string>dist/index.js</string>
+  </array>
+
+  <!-- server/.env is read from here (NODE_ENV, keys, Access settings). -->
+  <key>WorkingDirectory</key>
+  <string>__REPO__/server</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>__NODE_DIR__:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <!-- Start at login and restart if it ever exits. -->
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/jarvis-web/jarvis-web.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/jarvis-web/jarvis-web.err.log</string>
+</dict>
+</plist>

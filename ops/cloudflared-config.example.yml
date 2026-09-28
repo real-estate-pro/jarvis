@@ -1,0 +1,11 @@
+# Example ~/.cloudflared/config.yml for a locally managed tunnel.
+# If a tunnel already runs on this Mac, don't create a second one: add the jarvisbykush.us
+# rule to its existing ingress list, above the catch-all.
+tunnel: <TUNNEL-UUID>
+credentials-file: /Users/<you>/.cloudflared/<TUNNEL-UUID>.json
+
+ingress:
+  - hostname: jarvisbykush.us
+    service: http://127.0.0.1:4100
+  # ...any existing hostnames stay here...
+  - service: http_status:404
